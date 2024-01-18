@@ -1,4 +1,9 @@
-function populateRootElement(root, data) {
+function combineUrls(baseUrl, relativeUrl) {
+ const base = new URL(baseUrl)
+ return new URL(relativeUrl, base).href
+}
+
+function populateRootElement(url, root, data) {
  if (typeof data.attributes === 'object') {
   for (const [k, v] of Object.entries(
    data.attributes
@@ -6,19 +11,25 @@ function populateRootElement(root, data) {
    root.setAttribute(k, v)
   }
  }
- createChildElements(root, data.content)
+ createChildElements(url, root, data.content)
 }
 
-function createChildElements(root, contents) {
+function createChildElements(
+ url,
+ root,
+ contents
+) {
  for (const content of contents) {
   if (typeof content === 'string') {
+   const tempSpan =
+    document.createElement('span')
+   tempSpan.innerHTML = content
    root.appendChild(
-    document.createTextNode(content)
+    document.createTextNode(
+     tempSpan.textContent
+    )
    )
   } else {
-   if (content.type === 'script') {
-    continue
-   }
    const node = document.createElement(
     content.type
    )
@@ -26,11 +37,22 @@ function createChildElements(root, contents) {
     for (const [k, v] of Object.entries(
      content.attributes
     )) {
-     node.setAttribute(k, v)
+     switch (k) {
+      case 'href':
+      case 'src':
+       node.setAttribute(k, combineUrls(url, v))
+       break
+      default:
+       node.setAttribute(k, v)
+     }
     }
    }
    if (content.content) {
-    createChildElements(node, content.content)
+    createChildElements(
+     url,
+     node,
+     content.content
+    )
    }
    root.appendChild(node)
   }
@@ -38,11 +60,35 @@ function createChildElements(root, contents) {
 }
 
 function render(json) {
- console.log(json)
+ window.location = new URL(json.url)
+ document.body.addEventListener(
+  'click',
+  function (e) {
+   debugger
+   if (e.target.tagName === 'A') {
+    e.preventDefault()
+    top.postMessage(
+     {
+      type: 'navigate',
+      url: combineUrls(
+       json.url,
+       e.target.getAttribute('href')
+      ),
+     },
+     '*'
+    )
+   }
+  }
+ )
+
+ const candidateHtml = json?.content?.find(
+  (x) => x.type === 'html'
+ )
  const root =
-  json?.content?.find(
-   (x) => x.type === 'html'
-  ) ?? json
+  (json?.content?.some((x) => x.type === 'body')
+   ? json
+   : candidateHtml) ?? html
+
  if (!Array.isArray(root?.content)) {
   return
  }
@@ -50,13 +96,21 @@ function render(json) {
   (x) => x.type === 'head'
  )
  if (foundHead) {
-  populateRootElement(document.head, foundHead)
+  populateRootElement(
+   json.url,
+   document.head,
+   foundHead
+  )
  }
  const foundBody = root.content.find(
   (x) => x.type === 'body'
  )
  if (foundBody) {
-  populateRootElement(document.body, foundBody)
+  populateRootElement(
+   json.url,
+   document.body,
+   foundBody
+  )
  }
 }
 
