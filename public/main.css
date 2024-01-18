@@ -2,3 +2,11 @@ body {
  background-color: #646464;
  color: #969696;
 }
+
+iframe {
+ background-color: #424242;
+ border-radius: 10px;
+ box-shadow: 0 0 10px #000000;
+ height: 480px;
+ width: 320px;
+}

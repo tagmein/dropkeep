@@ -19,7 +19,11 @@ async function api(bodyRaw) {
   )
  }
  const result = await response.json()
- if ('error' in result) {
+ if (
+  typeof result === 'object' &&
+  result &&
+  'error' in result
+ ) {
   throw new Error(result.error)
  }
  return result
@@ -32,19 +36,48 @@ async function dkEcho(data) {
  })
 }
 
+async function dkHTML(url) {
+ return api({
+  operation: 'html',
+  data: { url },
+ })
+}
+
 async function dkStatus() {
  return api({
   operation: 'status',
-  data,
  })
 }
 
 async function main() {
- console.log(
-  'echo',
-  await dkEcho({ hello: 'world' })
+ const url = document.createElement('input')
+ const view = document.createElement('iframe')
+ view.setAttribute('allow', 'cross-origin')
+ url.addEventListener(
+  'input',
+  async function () {
+   const jsonSource = await dkHTML(url.value)
+   const viewHtml = `<!doctype html>
+<html>
+ <head>
+  <script src="/frame.js"></script>
+ </head>
+ <body>
+  render(${JSON.stringify(jsonSource)})
+ </body>
+</html>`
+   view.setAttribute(
+    'src',
+    URL.createObjectURL(
+     new Blob([viewHtml], {
+      type: 'text/html',
+     })
+    )
+   )
+  }
  )
- console.log('dkStatus', await dkStatus())
+ document.body.appendChild(url, view)
+ document.body.appendChild(view)
 }
 
 main().catch((e) => console.error(e))
