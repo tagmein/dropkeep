@@ -56,6 +56,7 @@ async function main() {
   async function () {
    const jsonSource = await dkHTML(url.value)
    const view = document.createElement('iframe')
+   view.setAttribute('src', '/frame.html')
    view.addEventListener('load', function () {
     view.contentWindow.postMessage(jsonSource)
    })
