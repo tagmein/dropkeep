@@ -1,7 +1,7 @@
 const apiUrl =
  location.origin === 'http://localhost:8076'
-  ? 'https://dropkeep.app'
-  : ''
+  ? 'https://dropkeep.app/api'
+  : '/api'
 
 async function api(bodyRaw) {
  const body = JSON.stringify(bodyRaw)
@@ -42,7 +42,7 @@ async function dkStatus() {
 async function main() {
  console.log(
   'echo',
-  await echo({ hello: 'world' })
+  await dkEcho({ hello: 'world' })
  )
  console.log('dkStatus', await dkStatus())
 }

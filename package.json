@@ -1,5 +1,6 @@
 {
  "dependencies": {
+  "@cloudflare/puppeteer": "^0.0.5",
   "@tagmein/civil-memory": "^0.0.13"
  },
  "devDependencies": {

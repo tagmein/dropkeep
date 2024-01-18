@@ -1,12 +1,6 @@
-import type {
- KVNamespace,
- PagesFunction,
-} from '@cloudflare/workers-types'
+import type { PagesFunction } from '@cloudflare/workers-types'
 import { dropKeepKV } from './lib/dropKeepKV'
-
-interface Env {
- DROPKEEP_KV: KVNamespace
-}
+import { DKEnv, DKEvent } from './lib/dkEvent'
 
 interface RequestBody {
  operation: string
@@ -14,7 +8,7 @@ interface RequestBody {
 }
 
 async function parseBody(
- context: EventContext<Env, '', any>
+ context: DKEvent
 ): Promise<RequestBody | null> {
  try {
   return context.request.json()
@@ -23,10 +17,8 @@ async function parseBody(
  }
 }
 
-export const onRequestPost: PagesFunction<Env> =
- async function (
-  context: EventContext<Env, '', any>
- ) {
+export const onRequestPost: PagesFunction<DKEnv> =
+ async function (context: DKEvent) {
   const dkkv = dropKeepKV(context)
   const requestBody = await parseBody(context)
   if (requestBody === null) {
