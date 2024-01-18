@@ -55,8 +55,8 @@ export const onRequestPost: PagesFunction<DKEnv> =
    )
   }
   try {
-   const responseBody = await dkkv[operation](
-    data
+   const responseBody = JSON.stringify(
+    await dkkv[operation](data)
    )
    return new Response(responseBody)
   } catch (e) {
