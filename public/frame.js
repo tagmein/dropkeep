@@ -4,3 +4,7 @@ function render(json) {
  source.textContent = json
  document.body.appendChild(source)
 }
+
+addEventListener('message', function (event) {
+ render(event.data)
+})

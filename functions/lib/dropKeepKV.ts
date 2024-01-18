@@ -14,7 +14,9 @@ export function dropKeepKV(context: DKEvent) {
     `<p>${response.status} ${response.statusText}</p>`
    )
   }
-  return HTMLToJSON(await response.text())
+  return HTMLToJSON(
+   `<html>${await response.text()}</html>`
+  )
  }
  async function status() {
   return 'ok'

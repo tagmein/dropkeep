@@ -51,33 +51,18 @@ async function dkStatus() {
 
 async function main() {
  const url = document.createElement('input')
- const view = document.createElement('iframe')
- view.setAttribute('allow', 'cross-origin')
  url.addEventListener(
   'input',
   async function () {
    const jsonSource = await dkHTML(url.value)
-   const viewHtml = `<!doctype html>
-<html>
- <head>
-  <script src="/frame.js"></script>
- </head>
- <body>
-  render(${JSON.stringify(jsonSource)})
- </body>
-</html>`
-   view.setAttribute(
-    'src',
-    URL.createObjectURL(
-     new Blob([viewHtml], {
-      type: 'text/html',
-     })
-    )
-   )
+   const view = document.createElement('iframe')
+   view.addEventListener('load', function () {
+    view.contentWindow.postMessage(jsonSource)
+   })
+   document.body.appendChild(view)
   }
  )
- document.body.appendChild(url, view)
- document.body.appendChild(view)
+ document.body.appendChild(url)
 }
 
 main().catch((e) => console.error(e))
